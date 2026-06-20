@@ -1,0 +1,22 @@
+{
+    "agus": {
+        "fullname": "agus",
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "role": "Staf Lapangan / Penyuluh"
+    },
+    "agus12": {
+        "fullname": "agus12",
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "role": "Dokter Hewan Berwenang"
+    },
+    "bagas": {
+        "fullname": "bagas",
+        "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+        "role": "Dokter Hewan Otoritas (Validator Medis)"
+    },
+    "ketua dinas": {
+        "fullname": "ketua dinas",
+        "password": "fa562b28df864be8ade9c89e7b58cd02452cbb93ebefcb5d74d74f7574ebd927",
+        "role": "Admin Sistem / Kepala Dinas"
+    }
+}

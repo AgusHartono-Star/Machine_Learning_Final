@@ -302,7 +302,7 @@ if menu == "📈 Analitik & Dashboard":
 # HALAMAN 2: KONSULTASI DIAGNOSA AI
 # ==========================================
 elif menu == "🔬 Konsultasi Diagnosa AI":
-    st.markdown("<div class='modern-banner'><h1>Sistem Pakar Deteksi Dini</h1><p>Input data gejala klinis untuk memicu kalkulasi probabilitas Machine Learning</p></div>", unsafe_allow_html=True)
+    st.markdown("<div class='modern-banner'><h1>Sistem Deteksi Dini</h1><p>Input data gejala klinis untuk memicu kalkulasi probabilitas Machine Learning</p></div>", unsafe_allow_html=True)
     
     st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
     st.write("### 🧬 Ringkasan Formulir Medis")
@@ -505,7 +505,7 @@ elif menu == "👤 Profil Pengembang":
         st.markdown(f"""
             <div class='custom-profile-card'>
                 <img class='custom-profile-img' src='{foto_dosen}'>
-                <div class='custom-badge' style='background-color: rgba(245, 158, 11, 0.15); color: #FBBF24;'>🎓 Dosen Pengampu</div>
+                <div class='custom-badge' style='background-color: rgba(245, 158, 11, 0.15); color: #FBBF24;'>🎓 Dosen Pembimbing</div>
                 <h5 style='margin: 0 0 5px 0; color: #F8FAFC;'>Rizal Adi Saputra, S.T., M.Kom.</h5>
                 <p style='margin: 0; font-size: 13px; color: #94A3B8;'>Dosen Teknik Informatika Universitas Halu Oleo</p>
             </div>

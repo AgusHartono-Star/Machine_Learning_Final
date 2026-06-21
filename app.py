@@ -263,7 +263,7 @@ st.sidebar.caption("💡 *Tip Mobile: Tekan panah (<) di pojok kiri atas HP Anda
 # HALAMAN 1: ANALITIK & DASHBOARD
 # ==========================================
 if menu == "📈 Analitik & Dashboard":
-    st.markdown(f"<div class='modern-banner'><h1>Dashboard Sistem Deteksi Dini Penyakit Ternak Sapi di Sultra</h1><p>Pemantauan Distribusi Kasus Secara Real-Time Wilayah Sulawesi Tenggara</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='modern-banner'><h1>Dashboard Sistem Deteksi Dini Penyakit Ternak Sapi Berdasarkan Gejala Klinis di Sultra</h1><p>Pemantauan Distribusi Kasus Secara Real-Time Wilayah Sulawesi Tenggara</p></div>", unsafe_allow_html=True)
     
     total_laporan = len(df_current)
     total_sapi = int(df_current['Jumlah hewan terkena (ekor)'].sum()) if not df_current.empty else 0

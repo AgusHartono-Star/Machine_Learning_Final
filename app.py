@@ -1,121 +1,222 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import json
+import os
+import hashlib
+import base64
 from backend import SapiBackend
 
 # ==========================================
-# 1. INJEKSI CSS PREMIUM CYBER DARK THEME V2
+# PEMANGGILAN BOOTSTRAP CDN
 # ==========================================
-SapiUI_CSS = """
+bootstrap_cdn = '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">'
+st.markdown(bootstrap_cdn, unsafe_allow_html=True)
+
+# ==========================================
+# FUNGSI BASE64 UNTUK KONVERSI GAMBAR LOKAL
+# ==========================================
+def get_base64_of_bin_file(bin_file):
+    if not os.path.exists(bin_file): 
+        # Fallback menggunakan avatar siluet default jika file belum ada di folder
+        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+    with open(bin_file, "rb") as f:
+        data = f.read()
+    return f"data:image/jpeg;base64,{base64.b64encode(data).decode()}"
+
+# Konversi semua aset foto lokal ke Base64 secara aman
+img_base64 = get_base64_of_bin_file("sapi.jpg")
+foto_coach = get_base64_of_bin_file("coach.jpg")
+foto_dosen = get_base64_of_bin_file("dosen_pengampu.jpg")
+foto_ketua = get_base64_of_bin_file("Ketua_Kelompok.jpeg")
+foto_agus  = get_base64_of_bin_file("anggota.jpeg")
+
+# ==========================================
+# 1. INJEKSI CSS PREMIUM CYBER GLASSMORPHISM V3
+# ==========================================
+SapiUI_CSS = f"""
 <style>
-/* Impor Font Modern */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-/* Latar Belakang Global Aplikasi & Font Master */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-    background-color: #0B0F19 !important; /* Deep Midnight Blue */
+/* Latar Belakang Aplikasi Global dengan Gambar sapi.jpg + Overlay Gelap */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+    background-image: linear-gradient(rgba(11, 15, 25, 0.85), rgba(11, 15, 25, 0.85)), url("{img_base64}") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
     color: #F8FAFC !important; 
     font-family: 'Plus Jakarta Sans', sans-serif !important;
-}
+}}
+
+/* Fallback lokal jika diakses tanpa static routing tertentu */
+[data-testid="stAppViewContainer"] {{
+    background-image: linear-gradient(rgba(11, 15, 25, 0.88), rgba(11, 15, 25, 0.88)), url("{img_base64}") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+}}
 
 /* Kustomisasi Sidebar Menu */
-[data-testid="stSidebar"] {
-    background-color: #111827 !important; /* Charcoal Dark */
-    border-right: 1px solid #1F2937;
-}
-
-/* Memastikan Kontrol Radio Sidebar Terlihat Elegan */
-[data-testid="stSidebar"] .stRadio > label {
-    font-weight: 600 !important;
-    color: #9CA3AF !important;
-}
+[data-testid="stSidebar"] {{
+    background-color: rgba(17, 24, 39, 0.85) !important; 
+    backdrop-filter: blur(12px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}}
 
 /* Semua Label Form & Widget Teks */
-.stWidgetLabel p, label, .stSelectbox p, .stNumberInput p, .stMultiSelect p, .stRadio p, p, span {
-    color: #94A3B8 !important; /* Soft Slate Gray */
+.stWidgetLabel p, label, .stSelectbox p, .stNumberInput p, .stMultiSelect p, .stRadio p, p, span {{
+    color: #94A3B8 !important; 
     font-weight: 500;
-}
+}}
+h1, h2, h3, h4, h5, h6 {{ color: #F8FAFC !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 700 !important; }}
 
-/* Heading Typography */
-h1, h2, h3, h4, h5, h6 {
-    color: #F8FAFC !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-weight: 700 !important;
-}
-
-/* Banner Header Premium dengan Efek Mesh Gradient */
-.modern-banner {
-    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #0284C7 100%);
+/* Banner Header Premium */
+.modern-banner {{
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 58, 138, 0.6) 50%, rgba(2, 132, 199, 0.6) 100%);
+    backdrop-filter: blur(8px);
     padding: 35px 25px;
     border-radius: 16px;
     color: white;
     text-align: center;
     margin-bottom: 30px;
-    border: 1px solid #1E40AF;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px rgba(2, 132, 199, 0.2);
-}
-.modern-banner h1 { color: #FFFFFF !important; font-size: 30px !important; margin: 0; letter-spacing: -0.5px; }
-.modern-banner p { color: #38BDF8 !important; font-size: 14px; margin-top: 10px; font-weight: 400; }
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+}}
+.modern-banner h1 {{ color: #FFFFFF !important; font-size: 30px !important; margin: 0; }}
+.modern-banner p {{ color: #38BDF8 !important; font-size: 14px; margin-top: 10px; }}
 
 /* Komponen KPI Card Grid dengan Hover Neon Glow */
-.kpi-container { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 25px; }
-.kpi-card { 
-    flex: 1; 
-    min-width: 220px; 
-    background: #111827; 
-    padding: 24px; 
-    border-radius: 14px; 
-    border: 1px solid #1F2937; 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
+.kpi-container {{ display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 25px; }}
+.kpi-card {{ 
+    flex: 1; min-width: 220px; 
+    background: rgba(17, 24, 39, 0.7) !important; 
+    backdrop-filter: blur(8px);
+    padding: 24px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.05); 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.kpi-card:hover { 
-    transform: translateY(-4px); 
-    border-color: #0EA5E9; 
-    box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.15), 0 0 15px rgba(14, 165, 233, 0.1);
-}
-.kpi-title { font-size: 11px; color: #6B7280; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-.kpi-value { font-size: 24px; font-weight: 700; color: #F9FAFB; }
+}}
+.kpi-card:hover {{ transform: translateY(-4px); border-color: #0EA5E9; box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.2); }}
+.kpi-title {{ font-size: 11px; color: #6B7280; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }}
+.kpi-value {{ font-size: 24px; font-weight: 700; color: #F9FAFB; }}
 
 /* Pembungkus Blok Grafik & Form (Card Container Layout) */
-.glass-panel {
-    background-color: #111827;
-    border: 1px solid #1F2937;
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-}
+.glass-panel {{ 
+    background-color: rgba(17, 24, 39, 0.65) !important; 
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    border-radius: 14px; padding: 20px; margin-bottom: 25px; 
+}}
+.diagnosa-box {{ 
+    background: rgba(17, 24, 39, 0.75); 
+    border-left: 6px solid #EF4444; padding: 24px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 25px; 
+}}
 
-/* Kotak Hasil Diagnosa AI Sukses (Red Theme Neon) */
-.diagnosa-box { 
-    background: #111827; 
-    border-left: 6px solid #EF4444; 
-    padding: 24px; 
-    border-radius: 12px; 
-    border-top: 1px solid #1F2937;
-    border-right: 1px solid #1F2937;
-    border-bottom: 1px solid #1F2937;
-    box-shadow: 0 20px 25px -5px rgba(239, 68, 68, 0.07), 0 0 20px rgba(0,0,0,0.5); 
-    margin-top: 20px; 
-    margin-bottom: 25px;
-}
+/* Desain Tombol Premium */
+.stButton>button {{
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: white !important; border: none !important; padding: 12px 24px !important; font-weight: 600 !important; border-radius: 10px !important;
+}}
+.stButton>button:hover {{ transform: translateY(-1px) !important; box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4) !important; }}
 
-/* Modifikasi Desain Tombol Streamlit (Primary Button Neon) */
-.stButton>button {
+/* ========================================== */
+/* HACK CSS UNTUK SIDEBAR MENU GAYA BOOTSTRAP */
+/* ========================================== */
+
+/* Sembunyikan titik radio asli */
+div[data-testid="stSidebar"] div[role="radiogroup"] > label > div:first-child {{
+    display: none;
+}}
+
+/* Mengubah item radio menjadi blok menu Bootstrap */
+div[data-testid="stSidebar"] div[role="radiogroup"] > label {{
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #CBD5E1;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}}
+
+/* Efek Sorot Menu (Hover) */
+div[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {{
+    background-color: rgba(37, 99, 235, 0.15);
+    border-color: #2563EB;
+    color: white;
+}}
+
+/* Efek Menu Terpilih (Active Bootstrap State) */
+div[data-testid="stSidebar"] div[role="radiogroup"] > label[data-selected="true"] {{
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     color: white !important;
-    border: none !important;
-    padding: 12px 24px !important;
-    font-weight: 600 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2) !important;
-    transition: all 0.2s !important;
-}
-.stButton>button:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4), 0 0 10px rgba(56, 189, 248, 0.2) !important;
-}
+    border-color: transparent !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}}
+
+/* Penyelarasan Posisi Ikon Emoji */
+div[data-testid="stSidebar"] div[role="radiogroup"] > label > div:nth-child(2) {{
+    margin-left: -5px;
+}}
+
+/* Gaya CSS Khusus untuk Efek Carousel Tim Pengembang */
+.carousel-container {{
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+    padding: 15px 5px 25px 5px;
+    scroll-behavior: smooth;
+}}
+.carousel-container::-webkit-scrollbar {{
+    height: 6px;
+}}
+.carousel-container::-webkit-scrollbar-track {{
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}}
+.carousel-container::-webkit-scrollbar-thumb {{
+    background: rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+}}
+.carousel-container::-webkit-scrollbar-thumb:hover {{
+    background: rgba(56, 189, 248, 0.6);
+}}
+.profile-card {{
+    flex: 0 0 250px;
+    background: rgba(17, 24, 39, 0.6) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}}
+.profile-card:hover {{
+    transform: translateY(-8px) scale(1.02);
+    border-color: #0EA5E9;
+    box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15), 0 0 15px rgba(14, 165, 233, 0.1);
+    background: rgba(17, 24, 39, 0.85) !important;
+}}
+.profile-img {{
+    width: 105px;
+    height: 105px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 15px auto;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}}
+.profile-card:hover .profile-img {{
+    border-color: #38BDF8;
+    transform: scale(1.05);
+}}
+.badge-coach {{ background-color: rgba(16, 185, 129, 0.15); color: #34D399; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }}
+.badge-dosen {{ background-color: rgba(245, 158, 11, 0.15); color: #FBBF24; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }}
+.badge-ketua {{ background-color: rgba(59, 130, 246, 0.15); color: #60A5FA; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }}
+.badge-anggota {{ background-color: rgba(156, 163, 175, 0.15); color: #9CA3AF; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }}
 </style>
 """
 st.markdown(SapiUI_CSS, unsafe_allow_html=True)
@@ -130,7 +231,6 @@ if 'db_aktif' not in st.session_state:
 
 df_current = pd.DataFrame(st.session_state.db_aktif)
 
-# Ekstraksi Master Data Pilihan secara Dinamis dari CSV Asli Anda
 if not df_current.empty:
     KABUPATEN_LIST = sorted(df_current['Kabupaten'].dropna().unique().tolist())
     SPESIES_LIST = sorted(df_current['Spesies'].dropna().unique().tolist())
@@ -145,13 +245,15 @@ GEJALA_MASTER = ['bulu_kusam', 'bulu_rontok', 'kekurusan', 'diare', 'anorexia',
                  'luka_berdarah', 'kembung', 'rhinitis', 'bersin', 'batuk']
 
 # ==========================================
-# 3. SIDEBAR NAVIGATION MENU
+# 3. SIDEBAR NAVIGATION MENU (PERBAIKAN MENU)
 # ==========================================
 st.sidebar.title("SI-SAPI SULTRA 🐄")
 st.sidebar.caption(f"Status: **{st.session_state.status_context}**")
+
+# Memasukkan opsi "👤 Profil Pengguna" ke sistem navigasi utama
 menu = st.sidebar.radio(
     "Menu Navigasi Laporan:",
-    ["📈 Analitik & Dashboard", "🔬 Konsultasi Diagnosa AI", "✍️ Input Kasus Baru", "📋 Database Historis"]
+    ["📈 Analitik & Dashboard", "🔬 Konsultasi Diagnosa AI", "✍️ Input Kasus Baru", "📋 Database Historis", "👤 Profil Pengembang"]
 )
 st.sidebar.markdown("---")
 st.sidebar.caption("💡 *Tip Mobile: Tekan panah (<) di pojok kiri atas HP Anda untuk menutup/membuka menu.*")
@@ -160,7 +262,7 @@ st.sidebar.caption("💡 *Tip Mobile: Tekan panah (<) di pojok kiri atas HP Anda
 # HALAMAN 1: ANALITIK & DASHBOARD
 # ==========================================
 if menu == "📈 Analitik & Dashboard":
-    st.markdown(f"<div class='modern-banner'><h1>Dashboard Epidemiologi Kesehatan Ternak</h1><p>Pemantauan Distribusi Kasus Secara Real-Time Wilayah Sulawesi Tenggara</p></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='modern-banner'><h1>Dashboard Sistem Deteksi Dini Penyakit Ternak Sapi di Sultra</h1><p>Pemantauan Distribusi Kasus Secara Real-Time Wilayah Sulawesi Tenggara</p></div>", unsafe_allow_html=True)
     
     total_laporan = len(df_current)
     total_sapi = int(df_current['Jumlah hewan terkena (ekor)'].sum()) if not df_current.empty else 0
@@ -236,12 +338,8 @@ elif menu == "🔬 Konsultasi Diagnosa AI":
             with st.spinner("Mengomputasi matriks fitur model Random Forest..."):
                 penyakit_pred, prob_dict = SapiBackend.hitung_prediksi_ai(gejala, jumlah)
             
-            # KONDISI KHUSUS: Jika file berkas model lawas terdeteksi
             if penyakit_pred == "VERSI_MODEL_LAMA":
                 st.error("❌ Mismatch Versi Model Terdeteksi!")
-                st.info("File 'model_prediksi_sapi.joblib' di direktori Anda masih versi lama. Harap jalankan cell ekspor terbaru di Jupyter Notebook Anda untuk memuat 'target_names'.")
-            
-            # KONDISI A: Sistem Keamanan Batas Threshold Terpicu (< 60%)
             elif penyakit_pred == "Gejala Tidak Dikenal / Terindikasi Penyakit Langka":
                 st.markdown(f"""
                     <div style='background-color: #111827; border-left: 6px solid #F97316; padding: 24px; border-radius: 12px; border: 1px solid #1F2937; box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.08); margin-top: 20px; margin-bottom: 25px;'>
@@ -254,8 +352,6 @@ elif menu == "🔬 Konsultasi Diagnosa AI":
                         </p>
                     </div>
                 """, unsafe_allow_html=True)
-            
-            # KONDISI B: Diagnosa Sukses Terhitung Komputer (> 60%)
             else:
                 st.markdown(f"""
                     <div class='diagnosa-box'>
@@ -265,13 +361,10 @@ elif menu == "🔬 Konsultasi Diagnosa AI":
                     </div>
                 """, unsafe_allow_html=True)
             
-            # Tampilkan Grafik Alternatif dengan Custom Design Plotly Express
             if prob_dict:
                 st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
                 st.write("#### 📊 Grafik Tingkat Keyakinan Penyakit Terdeteksi:")
                 df_chart = pd.DataFrame(list(prob_dict.items()), columns=['Penyakit', 'Persentase (%)']).sort_values(by='Persentase (%)', ascending=True)
-                
-                # Mengubah grafik bawaan menjadi horizontal bar chart Plotly yang premium
                 fig_pred = px.bar(df_chart, x='Persentase (%)', y='Penyakit', orientation='h', 
                                   text='Persentase (%)', template='plotly_dark',
                                   color='Persentase (%)', color_continuous_scale='Bluered')
@@ -282,7 +375,7 @@ elif menu == "🔬 Konsultasi Diagnosa AI":
                 st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 3: INPUT KASUS BARU
+# HALAMAN 3: INPUT KASUS BARU (PERBAIKAN SINTAKS)
 # ==========================================
 elif menu == "✍️ Input Kasus Baru":
     st.markdown("<div class='modern-banner'><h1>Pendaftaran Kasus Lapangan</h1><p>Formulir input resmi data surveilans penyakit hewan menular</p></div>", unsafe_allow_html=True)
@@ -299,7 +392,8 @@ elif menu == "✍️ Input Kasus Baru":
             
         gejala_in = st.multiselect("Daftar Tanda Klinis yang Ditemukan:", options=GEJALA_MASTER)
         
-        submit = st.st.form_submit_button("📁 Simpan Laporan Masuk", use_container_width=True) if hasattr(st, "st") else st.form_submit_button("📁 Simpan Laporan Masuk", use_container_width=True)
+        # Pembersihan sintaks ganda st.st
+        submit = st.form_submit_button("📁 Simpan Laporan Masuk", use_container_width=True)
         if submit:
             data_baru = SapiBackend.process_new_report(kab_in, desa_in, spe_in, jml_in, gejala_in)
             st.session_state.db_aktif.append(data_baru)
@@ -318,3 +412,140 @@ elif menu == "📋 Database Historis":
     
     csv_file = df_current.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Ekspor Seluruh Database (.CSV)", data=csv_file, file_name="Log_Penyakit_Sapi_Terbaru.csv", use_container_width=True)
+
+# ==========================================
+# HALAMAN 5: PROFIL PENGGUNA & TIM (STRUKTUR GRID STABIL)
+# ==========================================
+elif menu == "👤 Profil Pengembang":
+    st.markdown("<div class='modern-banner'><h1>Pusat Manajemen Akun & Tim</h1><p>Struktur tim pengembang sistem dan kredensial akademik pendukung</p></div>", unsafe_allow_html=True)
+    
+    # 1. BLOK KREDENSIAL PEMERIKSA (SIMULASI SECURE SESSION)
+    st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
+    st.write("### 🪪 Informasi Hak Otoritas Sistem")
+    st.markdown(f"""
+        <div style='background-color: rgba(31, 41, 55, 0.4); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;'>
+            <table style='width: 100%; border-collapse: collapse; border: none; color: #F8FAFC;'>
+                <tr style='border-bottom: 1px solid rgba(31, 41, 55, 0.5);'><td style='padding: 8px 0; font-weight: bold; color: #94A3B8; width: 30%;'>Instansi Otoritas</td><td style='padding: 8px 0; font-size: 14px;'>Dinas Tanaman Pangan & Peternakan Provinsi Sulawesi Tenggara</td></tr>
+                <tr><td style='padding: 8px 0; font-weight: bold; color: #94A3B8;'>Sesi Demo Status</td><td style='padding: 8px 0; color: #10B981; font-weight: 500;'>🟢 Terkoneksi Lokal (Secure Sandbox Mode)</td></tr>
+            </table>
+        </div>
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # 2. STRUKTUR TIM PENGEMBANG (MENGGUNAKAN ST.COLUMNS ANTI-PECAH)
+    st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
+    st.write("### 🎓 Struktur Pengembang Sistem & Pembimbing")
+    
+    # Injeksi CSS Desain Kartu (Tanpa f-string agar aman dari KeyError)
+# Injeksi CSS Desain Kartu (Tanpa f-string agar aman dari KeyError)
+    st.markdown("""
+        <style>
+        .custom-profile-card {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            background: rgba(17, 24, 39, 0.6) !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 25px 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100% !important;
+            min-height: 295px; /* 🔥 Kunci utama agar semua ukuran kartu sama rata */
+        }
+        
+        /* Memaksa semua teks di dalam kartu rata tengah */
+        .custom-profile-card h5, 
+        .custom-profile-card p {
+            text-align: center !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+        }
+        
+        .custom-profile-img {
+            width: 105px;
+            height: 105px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px auto !important;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: block !important;
+        }
+        .custom-profile-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: #0EA5E9;
+            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15);
+            background: rgba(17, 24, 39, 0.85) !important;
+        }
+        .custom-profile-card:hover .custom-profile-img {
+            border-color: #38BDF8;
+            transform: scale(1.05);
+        }
+        .custom-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block !important;
+            margin: 0 auto 10px auto !important;
+            text-align: center !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # --- BARIS ATAS: DOSEN PANGAMPU (DITENGAHKAN SECARA SIMETRIS) ---
+    col_d1, col_d2, col_d3 = st.columns([1, 1.8, 1])
+    with col_d2:
+        st.markdown(f"""
+            <div class='custom-profile-card'>
+                <img class='custom-profile-img' src='{foto_dosen}'>
+                <div class='custom-badge' style='background-color: rgba(245, 158, 11, 0.15); color: #FBBF24;'>🎓 Dosen Pengampu</div>
+                <h5 style='margin: 0 0 5px 0; color: #F8FAFC;'>Rizal Adi Saputra, S.T., M.Kom.</h5>
+                <p style='margin: 0; font-size: 13px; color: #94A3B8;'>Dosen Teknik Informatika Universitas Halu Oleo</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    # Garis pembatas tipis yang elegan
+    st.markdown("<hr style='border-color: rgba(255,255,255,0.05); margin: 25px 0;'>", unsafe_allow_html=True)
+    
+    # --- BARIS BAWAH: STRUKTUR TIM INTI KELOMPOK (3 KOLOM SEJAJAR) ---
+    col_t1, col_t2, col_t3 = st.columns(3)
+    
+    with col_t1:
+        st.markdown(f"""
+            <div class='custom-profile-card'>
+                <img class='custom-profile-img' src='{foto_coach}'>
+                <div class='custom-badge' style='background-color: rgba(16, 185, 129, 0.15); color: #34D399;'>💼 Coach</div>
+                <h5 style='margin: 0 0 5px 0; color: #F8FAFC;'>Vyola Cecilia Potto</h5>
+                <p style='margin: 0; font-size: 13px; color: #94A3B8;'>NIM. E1E1240279</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col_t2:
+        st.markdown(f"""
+            <div class='custom-profile-card'>
+                <img class='custom-profile-img' src='{foto_ketua}'>
+                <div>
+                    <span class='custom-badge' style='background-color: rgba(59, 130, 246, 0.15); color: #60A5FA;'>⚡ Ketua Kelompok</span>
+                </div>
+                <h5 style='margin: 5px 0 5px 0; color: #F8FAFC; font-weight: 700;'>Wa Ode Yurismawati</h5>
+                <p style='margin: 0; font-size: 13px; color: #94A3B8;'>NIM. E1E124080</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with col_t3:
+        st.markdown(f"""
+            <div class='custom-profile-card'>
+                <img class='custom-profile-img' src='{foto_agus}'>
+                <div class='custom-badge' style='background-color: rgba(156, 163, 175, 0.15); color: #9CA3AF;'>🧬 Anggota Kelompok</div>
+                <h5 style='margin: 0 0 5px 0; color: #F8FAFC;'> Agus Hartono</h5>
+                <p style='margin: 0; font-size: 13px; color: #94A3B8;'>NIM. E1E124025</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    st.markdown("</div>", unsafe_allow_html=True)

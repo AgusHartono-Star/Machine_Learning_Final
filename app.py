@@ -5,7 +5,7 @@ import json
 import os
 import hashlib
 import base64
-from backend import SapiBackend
+from backend import SapiBackend, KABUPATEN_SULTRA
 
 # ==========================================
 # PEMANGGILAN BOOTSTRAP CDN
@@ -231,11 +231,12 @@ if 'db_aktif' not in st.session_state:
 
 df_current = pd.DataFrame(st.session_state.db_aktif)
 
+# Sekarang variabel KABUPATEN_SULTRA sudah bisa langsung dipakai
 if not df_current.empty:
-    KABUPATEN_LIST = sorted(df_current['Kabupaten'].dropna().unique().tolist())
+    KABUPATEN_LIST = sorted(KABUPATEN_SULTRA) 
     SPESIES_LIST = sorted(df_current['Spesies'].dropna().unique().tolist())
 else:
-    KABUPATEN_LIST = ["Konawe", "Kolaka", "Bombana", "Kota Baubau"]
+    KABUPATEN_LIST = sorted(KABUPATEN_SULTRA)
     SPESIES_LIST = ["sapi", "sapi bali", "sapi po", "sapi limosin"]
 
 GEJALA_MASTER = ['bulu_kusam', 'bulu_rontok', 'kekurusan', 'diare', 'anorexia', 

@@ -9,7 +9,7 @@ KABUPATEN_SULTRA = [
     "Bombana", "Buton", "Buton Selatan", "Buton Tengah", "Buton Utara",
     "Kolaka", "Kolaka Timur", "Kolaka Utara", "Konawe", "Konawe Kepulauan",
     "Konawe Selatan", "Konawe Utara", "Muna", "Muna Barat", "Wakatobi",
-    "Kota Baubau", "Kota Kendari"
+    "Kota Baubau", "Kota Kendari", 
 ]
 SPESIES_SAPI = ["sapi", "sapi bali", "sapi po", "sapi limosin", "Sapi Peranakan Ongole", "sapi brahman", "sapi simental"]
 GEJALA_MASTER = ['bulu_kusam', 'bulu_rontok', 'kekurusan', 'diare', 'anorexia', 
